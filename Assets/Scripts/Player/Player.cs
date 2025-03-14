@@ -2,21 +2,54 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
+struct MoveData
+{
+    // 이동 전에 위치를 저장 하는 데이터
+    public Vector3 moveDirection;
+    // 이동 할 때 같이 움직인 공이 있으면 해당 오브젝트 정보 담는 데이터
+    public Ball movedBall;
+    public MoveData(Vector3 moveDirection, Ball movedBall)
+    {
+        this.moveDirection = moveDirection;
+        this.movedBall = movedBall;
+    }
+}
+class MoveStack
+{
+    MoveData[] list = new MoveData[100];
+    int top = -1;
+    public bool Add(MoveData data)
+    {
+        if (list.Length <= top) return false;
+        top++;
+        Debug.Log(top);
+        list[top] = data;
+        return true;
+    }
+    public MoveData Pop()
+    {
+        if (top < 0) return new MoveData(Vector3.zero, null);
+        MoveData returnVal = list[top];
+        top--;
+        return returnVal;
+    }
+}
 public class Player : MonoBehaviour
 {
-    void Start()
-    {
-        
-    }
-
+    MoveStack stack = new MoveStack();
+    Vector3 UP = Vector3.forward;
+    Vector3 DOWN = -Vector3.forward;
+    Vector3 RIGHT = Vector3.right;
+    Vector3 LEFT = -Vector3.right;
     void Update()
     {
+        UpdateMove();
+        UpdateGoBack();
+    }
+
+    public void UpdateMove()
+    {
         RaycastHit hit;
-        Vector3 UP = transform.forward;
-        Vector3 DOWN = -transform.forward;
-        Vector3 RIGHT = transform.right;
-        Vector3 LEFT = -transform.right;
 
         Vector3 moveDirection = Vector3.zero;
         if (Input.GetKeyDown(KeyCode.W))
@@ -28,6 +61,7 @@ public class Player : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.D))
             moveDirection = RIGHT;
 
+        if (moveDirection == Vector3.zero) return;
         if (Physics.Raycast(transform.position, moveDirection, out hit, 1))
         {
             if (hit.collider.tag == "Wall")
@@ -38,9 +72,11 @@ public class Player : MonoBehaviour
             {
                 // 공에게 이동 신호 전달
                 // bool 값 리턴 받아서 이동 성공 여부 확인 후 성공이면 공 있던 위치로 이동
-                bool isBallMove = hit.collider.GetComponent<Ball>().Move(moveDirection);
+                Ball hitBall = hit.collider.GetComponent<Ball>();
+                bool isBallMove = hitBall.Move(moveDirection);
                 if (isBallMove)
                 {
+                    stack.Add(new MoveData(moveDirection, hitBall));
                     gameObject.transform.position = gameObject.transform.position + moveDirection;
                 }
             }
@@ -52,7 +88,25 @@ public class Player : MonoBehaviour
         }
         else// 빈 공간일 때 이동
         {
+            stack.Add(new MoveData(moveDirection, null));
             gameObject.transform.position = gameObject.transform.position + moveDirection;
+        }
+    }
+    public void UpdateGoBack()
+    {
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            MoveData data = stack.Pop();
+            if (data.moveDirection == Vector3.zero)//스택이 없음을 의미
+            { }
+            else
+            {
+                transform.position -= data.moveDirection;
+                if (data.movedBall != null)
+                {
+                    data.movedBall.Move(-data.moveDirection);
+                }
+            }
         }
     }
 }

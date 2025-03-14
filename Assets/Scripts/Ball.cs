@@ -35,6 +35,17 @@ public class Ball : MonoBehaviour
                 }
                 return true;
             }
+            else if(hit.collider.tag == "Player")
+            {
+                // 이동 실행
+                if (isGoalPos == true)
+                {
+                    isGoalPos = false;
+                    GameManager.Instance.CurCnt--;
+                }
+                gameObject.transform.position = gameObject.transform.position + direction;
+                return true;
+            }
         }
         else // 아직까지 남은 경우의 수는 빈 공간 밖에 없음
         {
