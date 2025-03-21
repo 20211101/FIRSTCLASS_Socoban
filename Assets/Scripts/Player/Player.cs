@@ -5,13 +5,11 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    void Start()
-    {
-        
-    }
+    Stack stack = new Stack();
 
     void Update()
     {
+
         RaycastHit hit;
         Vector3 UP = transform.forward;
         Vector3 DOWN = -transform.forward;
@@ -27,6 +25,11 @@ public class Player : MonoBehaviour
             moveDirection = DOWN;
         else if (Input.GetKeyDown(KeyCode.D))
             moveDirection = RIGHT;
+        else if(Input.GetKeyDown(KeyCode.Q))
+        {
+            Data data = stack.Output();
+            transform.position = transform.position - data.ｄirection;
+        }
 
         if (Physics.Raycast(transform.position, moveDirection, out hit, 1))
         {
@@ -42,17 +45,21 @@ public class Player : MonoBehaviour
                 if (isBallMove)
                 {
                     gameObject.transform.position = gameObject.transform.position + moveDirection;
+                    stack.Input(new Data(moveDirection));
                 }
             }
             else if (hit.collider.tag == "Target")
             {
                 // 이동 허용
                 gameObject.transform.position = gameObject.transform.position + moveDirection;
+                stack.Input(new Data(moveDirection));
             }
         }
         else// 빈 공간일 때 이동
         {
             gameObject.transform.position = gameObject.transform.position + moveDirection;
+            if(moveDirection != Vector3.zero)
+                stack.Input(new Data(moveDirection));
         }
     }
 }

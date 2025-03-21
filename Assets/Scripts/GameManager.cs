@@ -46,6 +46,8 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(0);
     }
 
+
+
     private void Awake()
     {
         if (_Instance != null)
