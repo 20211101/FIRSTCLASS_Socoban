@@ -3,15 +3,14 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-<<<<<<< Updated upstream
+
     void Start()
     {
         
     }
-=======
+
     Stack stack = new Stack();
     private GameObject PlayerBall = null;
->>>>>>> Stashed changes
 
     void Update()
     {
@@ -30,8 +29,7 @@ public class Player : MonoBehaviour
             moveDirection = DOWN;
         else if (Input.GetKeyDown(KeyCode.D))
             moveDirection = RIGHT;
-<<<<<<< Updated upstream
-=======
+
         else if(Input.GetKeyDown(KeyCode.Q))
         {
             Data data = stack.Output();
@@ -42,7 +40,6 @@ public class Player : MonoBehaviour
                 PlayerBall.transform.position = PlayerBall.transform.position - data.£äirection;
             }
         }
->>>>>>> Stashed changes
 
         if (Physics.Raycast(transform.position, moveDirection, out hit, 1))
         {
@@ -59,12 +56,9 @@ public class Player : MonoBehaviour
                 if (isBallMove)
                 {
                     gameObject.transform.position = gameObject.transform.position + moveDirection;
-<<<<<<< Updated upstream
-=======
                     stack.Input(new Data(moveDirection));
 
                     PlayerBall = hit.collider.gameObject;
->>>>>>> Stashed changes
                 }
             }
             else if (hit.collider.tag == "Target")
