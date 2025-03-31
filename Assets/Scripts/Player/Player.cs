@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    Stack movStack = new Stack();
     void Start()
     {
         
@@ -27,6 +28,18 @@ public class Player : MonoBehaviour
             moveDirection = DOWN;
         else if (Input.GetKeyDown(KeyCode.D))
             moveDirection = RIGHT;
+        else if (Input.GetKeyDown(KeyCode.Q))
+        {
+            Data data = movStack.Output();
+            transform.position -= data.moveDir;
+            
+            if(data.targetBall != null) 
+            {
+                //공도 같이 움직이자!!
+                //공 정보는 ????
+                data.targetBall.transform.position -= data.moveDir;
+            }
+        }
 
         if (Physics.Raycast(transform.position, moveDirection, out hit, 1))
         {
@@ -42,17 +55,21 @@ public class Player : MonoBehaviour
                 if (isBallMove)
                 {
                     gameObject.transform.position = gameObject.transform.position + moveDirection;
+                    movStack.Input(new Data(moveDirection, hit.collider.GetComponent<Ball>()));
                 }
             }
             else if (hit.collider.tag == "Target")
             {
                 // 이동 허용
                 gameObject.transform.position = gameObject.transform.position + moveDirection;
+                movStack.Input(new Data(moveDirection));
             }
         }
         else// 빈 공간일 때 이동
         {
-            gameObject.transform.position = gameObject.transform.position + moveDirection;
+            if (moveDirection == Vector3.zero) return;
+            movStack.Input(new Data(moveDirection));
+            gameObject.transform.position += moveDirection;
         }
     }
 }
