@@ -5,16 +5,18 @@ using UnityEngine;
 
 public struct Data
 {
+    public Ball TargetBall;
     public Vector3 £‰irection;
 
-    public Data(Vector3 _£‰irection)
+    public Data(Vector3 _£‰irection, Ball _TargetBall = null)
     {
         £‰irection = _£‰irection;
+        TargetBall = _TargetBall;
     }
 }
 
 
-public class Stack : MonoBehaviour
+public class Stack
 {
     private Data[] data = new Data[100];// ∆˜¿Œ≈Õ
     private int cursor = -1;

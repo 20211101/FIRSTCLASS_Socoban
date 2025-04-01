@@ -35,10 +35,12 @@ public class Player : MonoBehaviour
             Data data = stack.Output();
             transform.position = transform.position - data.ｄirection;
 
-            if (PlayerBall != null)
-            {
-                PlayerBall.transform.position = PlayerBall.transform.position - data.ｄirection;
+            if (data.TargetBall != null)  // isBallMove가 공이 움직였는지를 확인하는 코드였음 
+            { // TargetBall가 어느 공에 닿아있는지 저장하기도 하지만 이 TargetBall에 값이 저장되는건 플레이어와 공이 닿아있다는 전제 하에 저장이 되는 것이기 때문에 
+                Transform BallTransform = data.TargetBall.transform; // TargetBall에 값이 저장되어 초기에 설정한 null이 아니면 공이 함께 움직였다는 뜻이 된다고 생각했습니당
+                BallTransform.position = BallTransform.position - data.ｄirection; 
             }
+            
         }
 
         if (Physics.Raycast(transform.position, moveDirection, out hit, 1))
@@ -56,7 +58,7 @@ public class Player : MonoBehaviour
                 if (isBallMove)
                 {
                     gameObject.transform.position = gameObject.transform.position + moveDirection;
-                    stack.Input(new Data(moveDirection));
+                    stack.Input(new Data(moveDirection, hit.collider.GetComponent<Ball>()));
 
                     PlayerBall = hit.collider.gameObject;
                 }
@@ -65,11 +67,17 @@ public class Player : MonoBehaviour
             {
                 // 이동 허용
                 gameObject.transform.position = gameObject.transform.position + moveDirection;
+                stack.Input(new Data(moveDirection));
             }
         }
         else// 빈 공간일 때 이동
         {
+            if(moveDirection==Vector3.zero) 
+            {
+                return;
+            }
             gameObject.transform.position = gameObject.transform.position + moveDirection;
+            stack.Input(new Data(moveDirection));// 그냥 이렇게만 적으면 이게 update 함수 안에 있는 코드라서 오버스택 발생함
         }
     }
 }
