@@ -1,24 +1,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 
 public class Player : MonoBehaviour
 {
+    public MoveHistoryManager historyManager;
+
+    Vector3 moveDirection;
+
     void Start()
     {
-        
+        if (historyManager == null)
+        {
+            historyManager = FindObjectOfType<MoveHistoryManager>();
+        }
     }
 
     void Update()
     {
-        RaycastHit hit;
+        RaycastHit hit; // 앞에 있는 오브젝트를 탐지하고, 해당 오브젝트를 담아두기 위함
         Vector3 UP = transform.forward;
         Vector3 DOWN = -transform.forward;
         Vector3 RIGHT = transform.right;
         Vector3 LEFT = -transform.right;
 
-        Vector3 moveDirection = Vector3.zero;
+        moveDirection = Vector3.zero;
         if (Input.GetKeyDown(KeyCode.W))
             moveDirection = UP;
         else if (Input.GetKeyDown(KeyCode.A))
@@ -28,31 +36,42 @@ public class Player : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.D))
             moveDirection = RIGHT;
 
-        if (Physics.Raycast(transform.position, moveDirection, out hit, 1))
+        if (moveDirection != Vector3.zero)
         {
-            if (hit.collider.tag == "Wall")
+            // 오브젝트 위치에서, 이동방향으로 1만큼의 거리를 탐지하고, 탐지된 것을 hit에 담기
+            if (Physics.Raycast(transform.position, moveDirection, out hit, 1))
             {
-                // NOTHING
-            }
-            else if (hit.collider.tag == "Ball")
-            {
-                // 공에게 이동 신호 전달
-                // bool 값 리턴 받아서 이동 성공 여부 확인 후 성공이면 공 있던 위치로 이동
-                bool isBallMove = hit.collider.GetComponent<Ball>().Move(moveDirection);
-                if (isBallMove)
+                if (hit.collider.tag == "Wall")         // 벽일 경우
                 {
+                    // NOTHING
+                }
+                else if (hit.collider.tag == "Ball")    // 공일 경우
+                {
+                    // 공에게 이동 신호 전달
+                    // bool 값 리턴 받아서 이동 성공 여부 확인 후 성공이면 공 있던 위치로 이동
+                    bool isBallMove = hit.collider.GetComponent<Ball>().Move(moveDirection);
+                    if (isBallMove)
+                    {
+                        gameObject.transform.position = gameObject.transform.position + moveDirection;
+                    }
+                }
+                else if (hit.collider.tag == "Target")  // 목표일 경우
+                {
+                    // 이동 허용
                     gameObject.transform.position = gameObject.transform.position + moveDirection;
                 }
             }
-            else if (hit.collider.tag == "Target")
+            else// 빈 공간일 때 이동
             {
-                // 이동 허용
+                historyManager.SaveState();
                 gameObject.transform.position = gameObject.transform.position + moveDirection;
             }
         }
-        else// 빈 공간일 때 이동
+        
+        else if (Input.GetKeyDown(KeyCode.Z))
         {
-            gameObject.transform.position = gameObject.transform.position + moveDirection;
+            historyManager.Undo();
+            Debug.Log("뒤로가기 시도");
         }
     }
 }

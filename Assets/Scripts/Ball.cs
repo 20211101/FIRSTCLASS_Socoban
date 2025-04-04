@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
+    public MoveHistoryManager historyManager;
+    void Start()
+    {
+        historyManager = FindObjectOfType<MoveHistoryManager>();
+
+    }
     // 현재 Target 오브젝트와 겹쳐져 있는지 상태 저장.
     //(Target과 겹친 상태에서 공을 움직이면 클리어 여부를 다시 조사해야 하기 때문)
     bool isGoalPos = false;
@@ -44,6 +50,7 @@ public class Ball : MonoBehaviour
                 isGoalPos = false;
                 GameManager.Instance.CurCnt--;
             }
+            historyManager.SaveState();
             gameObject.transform.position = gameObject.transform.position + direction;
             return true;
         }
