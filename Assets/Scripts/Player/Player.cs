@@ -42,16 +42,21 @@ public class Player : MonoBehaviour
                 }
                 else if (hit.collider.tag == "Ball")    // 공일 경우
                 {
-                    historyManager.SaveState(); // 볼과 플레이어 모두 이동 전에 저장
+                    historyManager.SaveState();
                     bool isBallMove = hit.collider.GetComponent<Ball>().Move(moveDirection);
                     if (isBallMove)
                     {
                         gameObject.transform.position = gameObject.transform.position + moveDirection;
                     }
+                    else
+                    {
+                        historyManager.Undo();
+                    }
                 }
                 else if (hit.collider.tag == "Target")  // 목표일 경우
                 {
                     // 타겟일 때는 굳이 저장 X
+                    historyManager.SaveState();
                     gameObject.transform.position = gameObject.transform.position + moveDirection;
                 }
             }
@@ -61,10 +66,13 @@ public class Player : MonoBehaviour
                 gameObject.transform.position = gameObject.transform.position + moveDirection;
             }
         }
-        
         else if (Input.GetKeyDown(KeyCode.Z))
         {
-            historyManager.Undo(); // 되돌리기 함수 실행
+            historyManager.Undo(); 
+        }
+        else if (Input.GetKeyDown(KeyCode.Y))
+        {
+            historyManager.Redo(); 
         }
     }
 }

@@ -5,7 +5,8 @@ using UnityEngine;
 public class Ball : MonoBehaviour
 {
     bool isGoalPos = false;
-    
+    public bool isComplete = false;
+
     public bool Move(Vector3 direction) 
     {
         RaycastHit hit;
@@ -30,6 +31,8 @@ public class Ball : MonoBehaviour
                 {
                     GameManager.Instance.CurCnt++;
                     isGoalPos = true;
+                    MarkComplete();
+
                 }
                 return true;
             }
@@ -48,5 +51,9 @@ public class Ball : MonoBehaviour
         }
         Debug.LogError("이게 걸리면 놓친 게 있는거임");
         return true;
+    }
+    public void MarkComplete()
+    {
+        isComplete = true;
     }
 }

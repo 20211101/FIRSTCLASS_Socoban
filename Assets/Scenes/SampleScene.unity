@@ -946,7 +946,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
-  ball: {fileID: 0}
+  balls: []
 --- !u!4 &1522831061
 Transform:
   m_ObjectHideFlags: 0
