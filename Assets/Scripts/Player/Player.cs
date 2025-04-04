@@ -6,27 +6,22 @@ using UnityEngine.EventSystems;
 
 public class Player : MonoBehaviour
 {
-    public MoveHistoryManager historyManager;
-
-    Vector3 moveDirection;
+    public MoveHistoryManager historyManager; 
 
     void Start()
     {
-        if (historyManager == null)
-        {
-            historyManager = FindObjectOfType<MoveHistoryManager>();
-        }
+        historyManager = FindObjectOfType<MoveHistoryManager>(); // 가져오기
     }
 
     void Update()
     {
-        RaycastHit hit; // 앞에 있는 오브젝트를 탐지하고, 해당 오브젝트를 담아두기 위함
+        RaycastHit hit; 
         Vector3 UP = transform.forward;
         Vector3 DOWN = -transform.forward;
         Vector3 RIGHT = transform.right;
         Vector3 LEFT = -transform.right;
 
-        moveDirection = Vector3.zero;
+        Vector3 moveDirection = Vector3.zero; 
         if (Input.GetKeyDown(KeyCode.W))
             moveDirection = UP;
         else if (Input.GetKeyDown(KeyCode.A))
@@ -47,8 +42,7 @@ public class Player : MonoBehaviour
                 }
                 else if (hit.collider.tag == "Ball")    // 공일 경우
                 {
-                    // 공에게 이동 신호 전달
-                    // bool 값 리턴 받아서 이동 성공 여부 확인 후 성공이면 공 있던 위치로 이동
+                    historyManager.SaveState(); // 볼과 플레이어 모두 이동 전에 저장
                     bool isBallMove = hit.collider.GetComponent<Ball>().Move(moveDirection);
                     if (isBallMove)
                     {
@@ -57,21 +51,20 @@ public class Player : MonoBehaviour
                 }
                 else if (hit.collider.tag == "Target")  // 목표일 경우
                 {
-                    // 이동 허용
+                    // 타겟일 때는 굳이 저장 X
                     gameObject.transform.position = gameObject.transform.position + moveDirection;
                 }
             }
             else// 빈 공간일 때 이동
             {
-                historyManager.SaveState();
+                historyManager.SaveState(); // 플레이어만 움직일 때는, 플레이어 이동 전에만 스택에 저장
                 gameObject.transform.position = gameObject.transform.position + moveDirection;
             }
         }
         
         else if (Input.GetKeyDown(KeyCode.Z))
         {
-            historyManager.Undo();
-            Debug.Log("뒤로가기 시도");
+            historyManager.Undo(); // 되돌리기 함수 실행
         }
     }
 }
