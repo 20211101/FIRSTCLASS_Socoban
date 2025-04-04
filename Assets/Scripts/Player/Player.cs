@@ -57,7 +57,7 @@ public class Player : MonoBehaviour
             }
             else// 빈 공간일 때 이동
             {
-                historyManager.SaveState(); // 플레이어만 움직일 때는, 플레이어 이동 전에만 스택에 저장
+                historyManager.SaveState(); // 플레이어만 움직일 때는 플레이어 이동 전에만 스택에 저장
                 gameObject.transform.position = gameObject.transform.position + moveDirection;
             }
         }
