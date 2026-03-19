@@ -5,6 +5,7 @@ public class GameManager : MonoBehaviour, IStageTurnListener
 {
     [SerializeField] private GameObject clearUI;
     [SerializeField] private MapCreator mapCreator;
+    [SerializeField] private UndoRecorder undoRecorder;
 
     private Goal[] goals;
 
@@ -12,6 +13,14 @@ public class GameManager : MonoBehaviour, IStageTurnListener
     {
         CreateStage();
         RefreshGoals();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            Undo();
+        }
     }
 
     private void CreateStage()
@@ -27,10 +36,29 @@ public class GameManager : MonoBehaviour, IStageTurnListener
         }
 
         stageInfo.Player.Init(this);
+
+        if (undoRecorder != null)
+        {
+            undoRecorder.Clear();
+        }
     }
 
-    public void OnPlayerActionFinished()
+    public void OnPlayerActionFinished(TurnRecord record)
     {
+        undoRecorder?.Push(record);
+        Physics.SyncTransforms();
+        RefreshGoals();
+    }
+
+    private void Undo()
+    {
+        if (undoRecorder == null)
+            return;
+
+        bool undoSuccess = undoRecorder.TryUndo();
+        if (!undoSuccess)
+            return;
+
         RefreshGoals();
     }
 
@@ -48,13 +76,18 @@ public class GameManager : MonoBehaviour, IStageTurnListener
         }
 
         if (filledGoalCount == goals.Length)
+        {
             GameClear();
+        }
+        else
+        {
+            clearUI.SetActive(false);
+        }
     }
 
     private void GameClear()
     {
-        if (clearUI != null)
-            clearUI.SetActive(true);
+        clearUI.SetActive(true);
     }
 
     public void RestartGame()

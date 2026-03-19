@@ -1,4 +1,4 @@
 public interface IStageTurnListener
 {
-    void OnPlayerActionFinished();
+    void OnPlayerActionFinished(TurnRecord record);
 }
