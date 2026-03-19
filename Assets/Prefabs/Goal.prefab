@@ -12,8 +12,9 @@ GameObject:
   - component: {fileID: 8267696758877504271}
   - component: {fileID: 5894291374315003712}
   - component: {fileID: 327224391574856188}
+  - component: {fileID: 8295542050513612534}
   m_Layer: 0
-  m_Name: Target
+  m_Name: Goal
   m_TagString: Target
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -105,3 +106,16 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &8295542050513612534
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5904196875036599441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76926bcb6844cf74cbbd2943cfcca1bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  checkRadius: 0.1

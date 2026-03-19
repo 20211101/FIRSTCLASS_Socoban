@@ -1,175 +1,112 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
 
 public class Player : MonoBehaviour
 {
-    void Start()
+    private IStageTurnListener stageTurnListener;
+
+    public void Init(IStageTurnListener stageTurnListener)
     {
-        
+        this.stageTurnListener = stageTurnListener;
     }
 
-    void Update()
+    private void Update()
     {
-        RaycastHit hit;
-        Vector3 UP = transform.forward;
-        Vector3 DOWN = -transform.forward;
-        Vector3 RIGHT = transform.right;
-        Vector3 LEFT = -transform.right;
+        MoveDirection moveDirection = GetInputDir();
+        if (moveDirection == MoveDirection.None)
+            return;
 
-        Vector3 moveDirection = Vector3.zero;
+        ScanResult scanResult = Scan(moveDirection);
+
+        bool actionSuccess = TryMove(moveDirection, scanResult);
+        if (!actionSuccess)
+            return;
+
+        stageTurnListener?.OnPlayerActionFinished();
+    }
+
+    private bool TryMove(MoveDirection moveDirection, ScanResult scanResult)
+    {
+        switch (scanResult.Type)
+        {
+            case ObjectType.None:
+            case ObjectType.Goal:
+                MoveSelf(moveDirection);
+                return true;
+
+            case ObjectType.Wall:
+                return false;
+
+            case ObjectType.Ball:
+                return TryPushBall(moveDirection, scanResult.Target);
+
+            default:
+                Debug.LogError($"Ï≤òÎ¶¨ÎêòÏßÄ ÏïäÏùÄ ObjectType: {scanResult.Type}");
+                return false;
+        }
+    }
+
+    private bool TryPushBall(MoveDirection moveDirection, GameObject target)
+    {
+        if (target == null)
+            return false;
+
+        Ball ball = target.GetComponent<Ball>();
+        if (ball == null)
+        {
+            Debug.LogError("Ball ÌÉúÍ∑∏ Ïò§Î∏åÏ†ùÌä∏Ïóê Ball Ïª¥Ìè¨ÎÑåÌä∏Í∞Ä ÏóÜÏäµÎãàÎã§.");
+            return false;
+        }
+
+        bool pushSuccess = ball.Move(moveDirection);
+        if (!pushSuccess)
+            return false;
+
+        MoveSelf(moveDirection);
+        return true;
+    }
+
+    private void MoveSelf(MoveDirection moveDirection)
+    {
+        transform.position += moveDirection.GetDir();
+    }
+
+    private ScanResult Scan(MoveDirection moveDirection)
+    {
+        Vector3 direction = moveDirection.GetDir();
+
+        if (Physics.Raycast(transform.position, direction, out RaycastHit hit, 1f))
+        {
+            GameObject target = hit.transform.gameObject;
+
+            if (hit.collider.CompareTag("Wall"))
+                return new ScanResult(ObjectType.Wall, target);
+
+            if (hit.collider.CompareTag("Ball"))
+                return new ScanResult(ObjectType.Ball, target);
+
+            if (hit.collider.CompareTag("Goal"))
+                return new ScanResult(ObjectType.Goal, target);
+
+            Debug.LogError($"Îì±Î°ùÎêòÏßÄ ÏïäÏùÄ TagÏùò Ïò§Î∏åÏ†ùÌä∏ÏûÖÎãàÎã§. Tag = {hit.collider.tag}");
+        }
+
+        return ScanResult.None;
+    }
+
+    private MoveDirection GetInputDir()
+    {
         if (Input.GetKeyDown(KeyCode.W))
-            moveDirection = UP;
-        else if (Input.GetKeyDown(KeyCode.A))
-            moveDirection = LEFT;
-        else if (Input.GetKeyDown(KeyCode.S))
-            moveDirection = DOWN;
-        else if (Input.GetKeyDown(KeyCode.D))
-            moveDirection = RIGHT;
+            return MoveDirection.UP;
 
-        if (Physics.Raycast(transform.position, moveDirection, out hit, 1))
-        {
-            if (hit.collider.tag == "Wall")
-            {
-                // NOTHING
-            }
-            else if (hit.collider.tag == "Ball")
-            {
-                // ∞¯ø°∞‘ ¿Ãµø Ω≈»£ ¿¸¥ﬁ
-                // bool ∞™ ∏Æ≈œ πﬁæ∆º≠ ¿Ãµø º∫∞¯ ø©∫Œ »Æ¿Œ »ƒ º∫∞¯¿Ã∏È ∞¯ ¿÷¥¯ ¿ßƒ°∑Œ ¿Ãµø
-                bool isBallMove = hit.collider.GetComponent<Ball>().Move(moveDirection);
-                if (isBallMove)
-                {
-                    gameObject.transform.position = gameObject.transform.position + moveDirection;
-                }
-            }
-            else if (hit.collider.tag == "Target")
-            {
-                // ¿Ãµø «„øÎ
-                gameObject.transform.position = gameObject.transform.position + moveDirection;
-            }
-        }
-        else// ∫Û ∞¯∞£¿œ ∂ß ¿Ãµø
-        {
-            gameObject.transform.position = gameObject.transform.position + moveDirection;
-        }
+        if (Input.GetKeyDown(KeyCode.A))
+            return MoveDirection.LEFT;
+
+        if (Input.GetKeyDown(KeyCode.S))
+            return MoveDirection.DOWN;
+
+        if (Input.GetKeyDown(KeyCode.D))
+            return MoveDirection.RIGHT;
+
+        return MoveDirection.None;
     }
 }
-
-        //if (Input.GetKeyDown(KeyCode.W))
-        //{
-        //    if (Physics.Raycast(transform.position, UP, out hit, 1))
-        //    {
-        //        if (hit.collider.tag == "Wall")
-        //        {
-        //            // NOTHING
-        //        }
-        //        else if(hit.collider.tag == "Ball")
-        //        {
-        //            // ∞¯ø°∞‘ ¿Ãµø Ω≈»£ ¿¸¥ﬁ
-        //            // bool ∞™ ∏Æ≈œ πﬁæ∆º≠ ¿Ãµø º∫∞¯ ø©∫Œ »Æ¿Œ »ƒ º∫∞¯¿Ã∏È ∞¯ ¿÷¥¯ ¿ßƒ°∑Œ ¿Ãµø
-        //            bool isBallMove = hit.collider.GetComponent<Ball>().Move(UP);
-        //            if(isBallMove) 
-        //            {
-        //                gameObject.transform.position = gameObject.transform.position + UP;
-        //            }
-        //        }
-        //        else if(hit.collider.tag == "Target")
-        //        {
-        //            // ¿Ãµø «„øÎ
-        //            gameObject.transform.position = gameObject.transform.position + UP;
-        //        }
-        //    }
-        //    else// ∫Û ∞¯∞£¿œ ∂ß ¿Ãµø
-        //    {
-        //        gameObject.transform.position = gameObject.transform.position + UP;
-        //    }
-        //}
-        //else if(Input.GetKeyDown(KeyCode.A))
-        //{
-        //    if (Physics.Raycast(transform.position, LEFT, out hit, 1))
-        //    {
-        //        if (hit.collider.tag == "Wall")
-        //        {
-        //            // NOTHING
-        //        }
-        //        else if (hit.collider.tag == "Ball")
-        //        {
-        //            // ∞¯ø°∞‘ ¿Ãµø Ω≈»£ ¿¸¥ﬁ
-        //            // bool ∞™ ∏Æ≈œ πﬁæ∆º≠ ¿Ãµø º∫∞¯ ø©∫Œ »Æ¿Œ »ƒ º∫∞¯¿Ã∏È ∞¯ ¿÷¥¯ ¿ßƒ°∑Œ ¿Ãµø
-        //            bool isBallMove = hit.collider.GetComponent<Ball>().Move(LEFT);
-        //            if (isBallMove)
-        //            {
-        //                gameObject.transform.position = gameObject.transform.position + LEFT;
-        //            }
-        //        }
-        //        else if (hit.collider.tag == "Target")
-        //        {
-        //            // ¿Ãµø «„øÎ
-        //            gameObject.transform.position = gameObject.transform.position + LEFT;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        gameObject.transform.position = gameObject.transform.position + LEFT;
-        //    }
-        //}
-        //else if (Input.GetKeyDown(KeyCode.S))
-        //{
-        //    if (Physics.Raycast(transform.position, DOWN, out hit, 1))
-        //    {
-        //        if (hit.collider.tag == "Wall")
-        //        {
-        //            // NOTHING
-        //        }
-        //        else if (hit.collider.tag == "Ball")
-        //        {
-        //            // ∞¯ø°∞‘ ¿Ãµø Ω≈»£ ¿¸¥ﬁ
-        //            // bool ∞™ ∏Æ≈œ πﬁæ∆º≠ ¿Ãµø º∫∞¯ ø©∫Œ »Æ¿Œ »ƒ º∫∞¯¿Ã∏È ∞¯ ¿÷¥¯ ¿ßƒ°∑Œ ¿Ãµø
-        //            bool isBallMove = hit.collider.GetComponent<Ball>().Move(DOWN);
-        //            if (isBallMove)
-        //            {
-        //                gameObject.transform.position = gameObject.transform.position + DOWN;
-        //            }
-        //        }
-        //        else if (hit.collider.tag == "Target")
-        //        {
-        //            // ¿Ãµø «„øÎ
-        //            gameObject.transform.position = gameObject.transform.position + DOWN;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        gameObject.transform.position = gameObject.transform.position + DOWN;
-        //    }
-        //}
-        //else if (Input.GetKeyDown(KeyCode.D))
-        //{
-        //    if (Physics.Raycast(transform.position, RIGHT, out hit, 1))
-        //    {
-        //        if (hit.collider.tag == "Wall")
-        //        {
-        //            // NOTHING
-        //        }
-        //        else if (hit.collider.tag == "Ball")
-        //        {
-        //            // ∞¯ø°∞‘ ¿Ãµø Ω≈»£ ¿¸¥ﬁ
-        //            // bool ∞™ ∏Æ≈œ πﬁæ∆º≠ ¿Ãµø º∫∞¯ ø©∫Œ »Æ¿Œ »ƒ º∫∞¯¿Ã∏È ∞¯ ¿÷¥¯ ¿ßƒ°∑Œ ¿Ãµø
-        //            bool isBallMove = hit.collider.GetComponent<Ball>().Move(RIGHT);
-        //            if (isBallMove)
-        //            {
-        //                gameObject.transform.position = gameObject.transform.position + RIGHT;
-        //            }
-        //        }
-        //        else if (hit.collider.tag == "Target")
-        //        {
-        //            // ¿Ãµø «„øÎ
-        //            gameObject.transform.position = gameObject.transform.position + RIGHT;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        gameObject.transform.position = gameObject.transform.position + RIGHT;
-        //    }
-        //}
