@@ -350,7 +350,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de21f819365f08741afb8a7271881b15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UI: {fileID: 496900415}
+  clearUI: {fileID: 496900415}
+  mapCreator: {fileID: 1307961968}
 --- !u!4 &757281687
 Transform:
   m_ObjectHideFlags: 0
@@ -630,10 +631,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c0d1cb4d3a4007488b50b43496a23ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Wall: {fileID: 8980838121298742696, guid: a77cf55cbdc783b469e1f6db38e718fd, type: 3}
-  Player: {fileID: 2482093133852756816, guid: 2f53e933142b85c4c95f76ab9210c218, type: 3}
-  Ball: {fileID: 5750600611264516749, guid: 7d7cdc64f1270f744a2cb9c70312833c, type: 3}
-  Target: {fileID: 5904196875036599441, guid: 775358807ff79dd44ba99961a809fc74, type: 3}
+  wallPrefab: {fileID: 8980838121298742696, guid: a77cf55cbdc783b469e1f6db38e718fd, type: 3}
+  playerPrefab: {fileID: 2482093133852756816, guid: 2f53e933142b85c4c95f76ab9210c218, type: 3}
+  ballPrefab: {fileID: 5750600611264516749, guid: 7d7cdc64f1270f744a2cb9c70312833c, type: 3}
+  goalPrefab: {fileID: 5904196875036599441, guid: 775358807ff79dd44ba99961a809fc74, type: 3}
 --- !u!4 &1307961969
 Transform:
   m_ObjectHideFlags: 0
