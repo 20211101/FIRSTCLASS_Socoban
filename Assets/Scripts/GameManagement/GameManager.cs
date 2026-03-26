@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -6,7 +7,12 @@ public class GameManager : MonoBehaviour, IStageTurnListener
     [SerializeField] private GameObject clearUI;
     [SerializeField] private MapCreator mapCreator;
 
+    private const int MaxUndoCount = 3;
+
+    private Player player;
     private Goal[] goals;
+    private readonly Stack<MoveRecord> moveHistory = new Stack<MoveRecord>();
+    private int remainingUndoCount = MaxUndoCount;
 
     private void Start()
     {
@@ -26,11 +32,29 @@ public class GameManager : MonoBehaviour, IStageTurnListener
             return;
         }
 
-        stageInfo.Player.Init(this);
+        player = stageInfo.Player;
+        player.Init(this);
     }
 
-    public void OnPlayerActionFinished()
+    public void OnPlayerActionFinished(MoveRecord record)
     {
+        moveHistory.Push(record);
+        Physics.SyncTransforms();
+        RefreshGoals();
+    }
+
+    public void OnUndoRequested()
+    {
+        if (moveHistory.Count == 0 || remainingUndoCount <= 0)
+            return;
+
+        remainingUndoCount--;
+        MoveRecord record = moveHistory.Pop();
+        player.transform.position = record.PlayerPrevPos;
+
+        if (record.MovedBall != null)
+            record.MovedBall.transform.position = record.BallPrevPos;
+
         Physics.SyncTransforms();
         RefreshGoals();
     }

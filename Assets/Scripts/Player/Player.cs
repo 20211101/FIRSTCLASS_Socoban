@@ -11,58 +11,68 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            stageTurnListener?.OnUndoRequested();
+            return;
+        }
+
         MoveDirection moveDirection = GetInputDir();
         if (moveDirection == MoveDirection.None)
             return;
 
         ScanResult scanResult = Scan(moveDirection);
 
-        bool actionSuccess = TryMove(moveDirection, scanResult);
-        if (!actionSuccess)
+        MoveRecord? record = TryMove(moveDirection, scanResult);
+        if (record == null)
             return;
 
-        stageTurnListener?.OnPlayerActionFinished();
+        stageTurnListener?.OnPlayerActionFinished(record.Value);
     }
 
-    private bool TryMove(MoveDirection moveDirection, ScanResult scanResult)
+    private MoveRecord? TryMove(MoveDirection moveDirection, ScanResult scanResult)
     {
         switch (scanResult.Type)
         {
             case ObjectType.None:
             case ObjectType.Goal:
+                MoveRecord moveRecord = new MoveRecord(transform.position);
                 MoveSelf(moveDirection);
-                return true;
+                return moveRecord;
 
             case ObjectType.Wall:
-                return false;
+                return null;
 
             case ObjectType.Ball:
                 return TryPushBall(moveDirection, scanResult.Target);
 
             default:
                 Debug.LogError($"처리되지 않은 ObjectType: {scanResult.Type}");
-                return false;
+                return null;
         }
     }
 
-    private bool TryPushBall(MoveDirection moveDirection, GameObject target)
+    private MoveRecord? TryPushBall(MoveDirection moveDirection, GameObject target)
     {
         if (target == null)
-            return false;
+            return null;
 
         Ball ball = target.GetComponent<Ball>();
         if (ball == null)
         {
             Debug.LogError("Ball 태그 오브젝트에 Ball 컴포넌트가 없습니다.");
-            return false;
+            return null;
         }
+
+        Vector3 ballPrevPos = ball.transform.position;
 
         bool pushSuccess = ball.Move(moveDirection);
         if (!pushSuccess)
-            return false;
+            return null;
 
+        MoveRecord record = new MoveRecord(transform.position, ball, ballPrevPos);
         MoveSelf(moveDirection);
-        return true;
+        return record;
     }
 
     private void MoveSelf(MoveDirection moveDirection)

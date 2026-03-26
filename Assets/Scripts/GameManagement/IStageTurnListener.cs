@@ -1,4 +1,5 @@
 public interface IStageTurnListener
 {
-    void OnPlayerActionFinished();
+    void OnPlayerActionFinished(MoveRecord record);
+    void OnUndoRequested();
 }
