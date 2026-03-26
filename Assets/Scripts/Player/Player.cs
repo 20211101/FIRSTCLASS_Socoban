@@ -8,6 +8,27 @@ public class Player : MonoBehaviour
 
     private void SaveState()
     {
+        //  3개 초과하면 가장 오래된 거 제거
+        if (history.Count >= 3)
+        {
+            // Stack은 아래부터 못 지우니까 임시로 뒤집기
+            Stack<TurnState> temp = new Stack<TurnState>();
+
+            while (history.Count > 1)
+            {
+                temp.Push(history.Pop());
+            }
+
+            // 가장 오래된 것 제거
+            history.Pop();
+
+            // 다시 복구
+            while (temp.Count > 0)
+            {
+                history.Push(temp.Pop());
+            }
+        }
+
         TurnState state = new TurnState();
 
         // 플레이어 위치
