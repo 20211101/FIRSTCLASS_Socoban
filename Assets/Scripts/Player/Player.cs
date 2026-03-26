@@ -1,8 +1,43 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    private Stack<TurnState> history = new Stack<TurnState>();
     private IStageTurnListener stageTurnListener;
+
+    private void SaveState()
+    {
+        TurnState state = new TurnState();
+
+        // 플레이어 위치
+        state.playerPos = transform.position;
+
+        // 공 위치
+        Ball[] balls = FindObjectsOfType<Ball>();
+        foreach (Ball b in balls)
+        {
+            state.balls.Add((b, b.transform.position));
+        }
+
+        history.Push(state);
+    }
+    private void Undo()
+    {
+        if (history.Count == 0)
+            return;
+
+        TurnState state = history.Pop();
+
+        // 플레이어 복원
+        transform.position = state.playerPos;
+
+        // 공 복원
+        foreach (var b in state.balls)
+        {
+            b.ball.transform.position = b.pos;
+        }
+    }
 
     public void Init(IStageTurnListener stageTurnListener)
     {
@@ -11,15 +46,28 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        // 🔹 Undo 먼저 처리
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            Undo();
+            return;
+        }
+
         MoveDirection moveDirection = GetInputDir();
         if (moveDirection == MoveDirection.None)
             return;
 
+        SaveState(); // ⭐ 이동 전에 저장
+
         ScanResult scanResult = Scan(moveDirection);
 
         bool actionSuccess = TryMove(moveDirection, scanResult);
+
         if (!actionSuccess)
+        {
+            history.Pop(); // ⭐ 실패하면 저장 취소
             return;
+        }
 
         stageTurnListener?.OnPlayerActionFinished();
     }
