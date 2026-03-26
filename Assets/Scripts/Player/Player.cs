@@ -3,6 +3,13 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     private IStageTurnListener stageTurnListener;
+    [SerializeField] private MoveCheck moveCheck;
+
+    private void Start()
+    {
+        moveCheck = GameObject.FindObjectOfType<MoveCheck>();
+        moveCheck.Set();
+    }
 
     public void Init(IStageTurnListener stageTurnListener)
     {
@@ -95,17 +102,30 @@ public class Player : MonoBehaviour
 
     private MoveDirection GetInputDir()
     {
+
         if (Input.GetKeyDown(KeyCode.W))
+        {
+            moveCheck.PositionCheck();
             return MoveDirection.UP;
+        }
 
         if (Input.GetKeyDown(KeyCode.A))
+        {
+            moveCheck.PositionCheck();
             return MoveDirection.LEFT;
+        }
 
         if (Input.GetKeyDown(KeyCode.S))
+        {
+            moveCheck.PositionCheck();
             return MoveDirection.DOWN;
+        }
 
         if (Input.GetKeyDown(KeyCode.D))
+        {
+            moveCheck.PositionCheck();
             return MoveDirection.RIGHT;
+        }
 
         return MoveDirection.None;
     }

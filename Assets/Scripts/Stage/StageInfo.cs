@@ -1,6 +1,7 @@
+using System;
 using UnityEngine;
 
-public readonly struct StageInfo
+public struct StageInfo
 {
     public Player Player { get; }
     public Goal[] Goals { get; }
@@ -9,5 +10,6 @@ public readonly struct StageInfo
     {
         Player = player;
         Goals = goals;
+
     }
 }

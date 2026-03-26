@@ -5,7 +5,6 @@ public class Ball : MonoBehaviour
     public bool Move(MoveDirection moveDirection)
     {
         Vector3 direction = moveDirection.GetDir();
-
         if (direction == Vector3.zero)
             return false;
 
