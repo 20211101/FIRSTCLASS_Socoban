@@ -31,6 +31,7 @@ public class GameManager : MonoBehaviour, IStageTurnListener
 
     public void OnPlayerActionFinished()
     {
+        Physics.SyncTransforms();
         RefreshGoals();
     }
 

@@ -1,8 +1,10 @@
+using System.Collections;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
     private IStageTurnListener stageTurnListener;
+    Stack moveDirections = new Stack();
 
     public void Init(IStageTurnListener stageTurnListener)
     {
@@ -20,6 +22,7 @@ public class Player : MonoBehaviour
         bool actionSuccess = TryMove(moveDirection, scanResult);
         if (!actionSuccess)
             return;
+        moveDirections.Push(moveDirection);
 
         stageTurnListener?.OnPlayerActionFinished();
     }
@@ -106,6 +109,14 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.D))
             return MoveDirection.RIGHT;
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            if (!(moveDirections.Count > 0))
+                return MoveDirection.None;
+            //MoveDirection moveDirec = new MoveDirection(  -( (Vector3)moveDirections.Peek() )  );
+            //return moveDirec;
+        }
 
         return MoveDirection.None;
     }
