@@ -30,6 +30,7 @@ public class Player : MonoBehaviour
         {
             case ObjectType.None:
             case ObjectType.Goal:
+                stageTurnListener?.SaveUndoState();
                 MoveSelf(moveDirection);
                 return true;
 
@@ -56,6 +57,11 @@ public class Player : MonoBehaviour
             Debug.LogError("Ball 태그 오브젝트에 Ball 컴포넌트가 없습니다.");
             return false;
         }
+
+        if (!ball.CanMove(moveDirection))
+            return false;
+
+        stageTurnListener?.SaveUndoState();
 
         bool pushSuccess = ball.Move(moveDirection);
         if (!pushSuccess)

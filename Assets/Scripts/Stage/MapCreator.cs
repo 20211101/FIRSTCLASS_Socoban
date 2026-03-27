@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 // 0 : Empty
@@ -28,6 +27,7 @@ public class MapCreator : MonoBehaviour
     public StageInfo CreateStage()
     {
         List<Goal> createdGoals = new List<Goal>();
+        List<Ball> createdBalls = new List<Ball>();
         Player createdPlayer = null;
 
         for (int z = 0; z < map.Length; z++)
@@ -46,34 +46,45 @@ public class MapCreator : MonoBehaviour
                         break;
 
                     case 2:
-                        {
-                            GameObject playerObject = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
-                            createdPlayer = playerObject.GetComponent<Player>();
+                    {
+                        GameObject playerObject = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
+                        createdPlayer = playerObject.GetComponent<Player>();
 
-                            if (createdPlayer == null)
-                                Debug.LogError("Player 프리팹에 Player 컴포넌트가 없습니다.");
+                        if (createdPlayer == null)
+                            Debug.LogError("Player 프리팹에 Player 컴포넌트가 없습니다.");
 
-                            break;
-                        }
+                        break;
+                    }
 
                     case 3:
-                        Instantiate(ballPrefab, spawnPosition, Quaternion.identity);
-                        break;
+                    {
+                        GameObject ballObject = Instantiate(ballPrefab, spawnPosition, Quaternion.identity);
+                        Ball ball = ballObject.GetComponent<Ball>();
 
-                    case 4:
+                        if (ball == null)
                         {
-                            GameObject goalObject = Instantiate(goalPrefab, spawnPosition, Quaternion.identity);
-                            Goal goal = goalObject.GetComponent<Goal>();
-
-                            if (goal == null)
-                            {
-                                Debug.LogError("Goal 프리팹에 Goal 컴포넌트가 없습니다.");
-                                break;
-                            }
-
-                            createdGoals.Add(goal);
+                            Debug.LogError("Ball 프리팹에 Ball 컴포넌트가 없습니다.");
                             break;
                         }
+
+                        createdBalls.Add(ball);
+                        break;
+                    }
+
+                    case 4:
+                    {
+                        GameObject goalObject = Instantiate(goalPrefab, spawnPosition, Quaternion.identity);
+                        Goal goal = goalObject.GetComponent<Goal>();
+
+                        if (goal == null)
+                        {
+                            Debug.LogError("Goal 프리팹에 Goal 컴포넌트가 없습니다.");
+                            break;
+                        }
+
+                        createdGoals.Add(goal);
+                        break;
+                    }
 
                     default:
                         Debug.LogError("정의되지 않은 맵 값입니다.");
@@ -82,6 +93,6 @@ public class MapCreator : MonoBehaviour
             }
         }
 
-        return new StageInfo(createdPlayer, createdGoals.ToArray());
+        return new StageInfo(createdPlayer, createdGoals.ToArray(), createdBalls.ToArray());
     }
 }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
-    public bool Move(MoveDirection moveDirection)
+    public bool CanMove(MoveDirection moveDirection)
     {
         Vector3 direction = moveDirection.GetDir();
 
@@ -18,7 +18,15 @@ public class Ball : MonoBehaviour
                 return false;
         }
 
-        transform.position += direction;
+        return true;
+    }
+
+    public bool Move(MoveDirection moveDirection)
+    {
+        if (!CanMove(moveDirection))
+            return false;
+
+        transform.position += moveDirection.GetDir();
         return true;
     }
 }
