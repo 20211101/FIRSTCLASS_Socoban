@@ -1,10 +1,12 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+
 
 public class Player : MonoBehaviour
 {
     private IStageTurnListener stageTurnListener;
-    Stack moveDirections = new Stack();
+    private Stack<MoveDirection> moveHistory = new Stack<MoveDirection>(); //추가
 
     public void Init(IStageTurnListener stageTurnListener)
     {
@@ -13,6 +15,12 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            Undo();
+            return;
+        }
+
         MoveDirection moveDirection = GetInputDir();
         if (moveDirection == MoveDirection.None)
             return;
@@ -20,9 +28,9 @@ public class Player : MonoBehaviour
         ScanResult scanResult = Scan(moveDirection);
 
         bool actionSuccess = TryMove(moveDirection, scanResult);
-        if (!actionSuccess)
-            return;
-        moveDirections.Push(moveDirection);
+        if (!actionSuccess) { return; }
+
+        moveHistory.Push(moveDirection); //추가
 
         stageTurnListener?.OnPlayerActionFinished();
     }
@@ -110,13 +118,48 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.D))
             return MoveDirection.RIGHT;
 
-        if (Input.GetKeyDown(KeyCode.E))
+        return MoveDirection.None;
+    }
+
+    //======추가==========
+    private void Undo()
+    {
+        if (moveHistory.Count == 0) return;
+
+        // 마지막 이동 방향을 꺼냄
+        MoveDirection lastMove = moveHistory.Pop();
+
+        // 반대 방향 계산
+        MoveDirection reverseDir = GetReverseDirection(lastMove);
+
+        // 플레이어 뒤로 이동
+        // 주의: 소코반 특성상 '되돌리기'는 물리적 충돌을 무시하고 강제로 위치를 옮겨야 합니다.
+        // 만약 공을 밀면서 이동했었다면 공도 당겨와야 하는데, 
+        // 여기서는 단순화를 위해 플레이어의 이전 위치에 공이 있는지 체크 후 당겨오는 로직이 필요할 수 있습니다.
+
+        // 되돌리기 경로에 공이 있었는지 확인 (플레이어가 갔던 방향에 공이 있는지 확인)
+        if (Physics.Raycast(transform.position, lastMove.GetDir(), out RaycastHit hit, 1f))
         {
-            if (!(moveDirections.Count > 0))
-                return MoveDirection.None;
-            //MoveDirection moveDirec = new MoveDirection(  -( (Vector3)moveDirections.Peek() )  );
-            //return moveDirec;
+            if (hit.collider.CompareTag("Ball"))
+            {
+                // 공을 플레이어가 있던 현재 위치로 당김
+                Ball ball = hit.transform.GetComponent<Ball>();
+                if (ball != null) ball.Move(reverseDir);
+            }
         }
+        // 플레이어 자신을 반대 방향으로 이동
+        MoveSelf(reverseDir);
+
+        // 턴 종료 알림 (필요 시)
+        stageTurnListener?.OnPlayerActionFinished();
+    }
+
+    private MoveDirection GetReverseDirection(MoveDirection dir)
+    {
+        if (dir == MoveDirection.UP) return MoveDirection.DOWN;
+        if (dir == MoveDirection.DOWN) return MoveDirection.UP;
+        if (dir == MoveDirection.LEFT) return MoveDirection.RIGHT;
+        if (dir == MoveDirection.RIGHT) return MoveDirection.LEFT;
 
         return MoveDirection.None;
     }
